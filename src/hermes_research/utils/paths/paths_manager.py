@@ -55,3 +55,6 @@ class PathsManager(PathsManagerInterface):
         """
         config_dir = self._get_config_root_dir()
         return str(config_dir / self.CONFIG_FILE_NAME)
+
+    def get_research_session_path(self, research_parent_directory: str, session_name: str) -> str:
+        return str(Path(research_parent_directory) / session_name)

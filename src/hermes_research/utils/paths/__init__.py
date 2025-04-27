@@ -6,5 +6,10 @@ class PathsManagerInterface(ABC):
         pass
     
     @abstractmethod
-    def get_config_path(self):
+    def get_config_path(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_research_session_path(self, research_parent_directory: str, session_name: str) -> str:
+        """Gets the absolute path for a specific research session directory."""
         pass
