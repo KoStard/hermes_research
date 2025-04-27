@@ -13,3 +13,8 @@ class PathsManagerInterface(ABC):
     def get_research_session_path(self, research_parent_directory: str, session_name: str) -> str:
         """Gets the absolute path for a specific research session directory."""
         pass
+
+    @abstractmethod
+    def get_remote_files_folder(self) -> str:
+        """Gets the absolute path for the remote files folder."""
+        pass
