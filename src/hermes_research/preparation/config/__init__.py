@@ -8,3 +8,7 @@ class ConfigManagerInterface(ABC):
     @abstractmethod
     def set_config(self, key, value):
         pass
+
+    @abstractmethod
+    def initialize_default_config(self):
+        pass
