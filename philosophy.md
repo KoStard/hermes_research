@@ -24,4 +24,5 @@
 - Have separate files for the implementation classes
 - Nest packages logically
 - Check if the interface needs to be updated, does it pass all the necessary information?
+- Have detailed logging (through `logger = logging.getLogger(__name__)`) with debug, concise with info
 - 
