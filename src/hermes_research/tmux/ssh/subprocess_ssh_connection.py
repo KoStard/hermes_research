@@ -42,7 +42,7 @@ class SubprocessSSHConnection(SSHConnectionInterface):
             logger.error(f"An unexpected error occurred during SSH connection test: {e}")
             return False
 
-    def execute_command_on_remote(self, command: str, destination: SSHDestination):
+    def execute_command_on_remote(self, command: str, destination: SSHDestination) -> tuple[str, str, int]:
         """
         Executes a command on the remote server via SSH.
 
@@ -50,8 +50,10 @@ class SubprocessSSHConnection(SSHConnectionInterface):
             command: The command string to execute remotely.
             destination: The SSH destination details.
 
+        Returns:
+            A tuple containing (stdout, stderr, return_code).
+
         Raises:
-            subprocess.CalledProcessError: If the remote command returns a non-zero exit code.
             FileNotFoundError: If the ssh command is not found.
             Exception: For other potential errors during execution.
         """
@@ -62,21 +64,25 @@ class SubprocessSSHConnection(SSHConnectionInterface):
         ]
         try:
             logger.debug(f"Executing remote command: {' '.join(ssh_command)}")
-            # Using check=True to automatically raise CalledProcessError on non-zero exit status
-            result = subprocess.run(ssh_command, check=True, capture_output=True, text=True)
-            logger.info(f"Remote command executed successfully on {destination.username}@{destination.hostname}.")
+            # Using check=False to capture output even on failure
+            result = subprocess.run(ssh_command, check=False, capture_output=True, text=True)
+            
+            if result.returncode == 0:
+                logger.info(f"Remote command executed successfully on {destination.username}@{destination.hostname}.")
+            else:
+                 logger.warning(f"Remote command failed on {destination.username}@{destination.hostname}. Command: '{command}'. Return code: {result.returncode}")
+                 logger.warning(f"Stderr: {result.stderr}")
+
             logger.debug(f"Remote command stdout: {result.stdout}")
             logger.debug(f"Remote command stderr: {result.stderr}")
-            # The interface doesn't specify a return value, so we don't return anything on success.
-            # If output is needed, the interface should be updated.
-        except subprocess.CalledProcessError as e:
-            logger.error(f"Remote command failed on {destination.username}@{destination.hostname}. Command: '{command}'. Return code: {e.returncode}")
-            logger.error(f"Stderr: {e.stderr}")
-            # Re-raise the exception to signal failure
-            raise e
+            
+            return result.stdout, result.stderr, result.returncode
+
         except FileNotFoundError:
             logger.error("SSH command not found. Please ensure OpenSSH client is installed and in PATH.")
-            raise # Re-raise the exception
+            # Re-raise the exception as it indicates a setup problem
+            raise 
         except Exception as e:
             logger.error(f"An unexpected error occurred during remote command execution: {e}")
-            raise # Re-raise the exception
+            # Re-raise other unexpected exceptions
+            raise

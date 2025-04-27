@@ -4,6 +4,9 @@ from typing import List
 class TmuxManagerInterface(ABC):
     @abstractmethod
     def set_remote(self, destination: str):
+        """
+        If not set, the default is to use the local tmux server.
+        """
         pass
     
     @abstractmethod
