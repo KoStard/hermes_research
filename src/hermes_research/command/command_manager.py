@@ -1,0 +1,5 @@
+from hermes_research.command import HermesResearchCommandManagerInterface
+
+
+class HermesResearchCommandManager(HermesResearchCommandManagerInterface):
+    pass

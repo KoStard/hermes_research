@@ -1,0 +1,11 @@
+- Create subpackages in python
+- Create interface (ABC) in __init__.py, don't import the implementation here
+- Use dependency injection from the `main` function when instantiating the implementations
+- Create unit tests for each package, verifying the public methods
+- Use clear naming pattern for the test names: `methodName_expectedBehaviour_inWhichSituation`
+- Have separate files for the implementation classes
+- Nest packages logically
+- Test-driven development - write the unit test for the capability you want, then implement
+- For testing using pytest, use fixtures if needed
+- Development is partitioned by subpackage. Don't spread development throughout multiple subpackages.
+- In the tests write dummy data, never put real paths/names/data
