@@ -98,11 +98,13 @@ This path sets up the research on a configured remote server, copies necessary f
 ```mermaid
 graph TD
     subgraph Remote Execution
-        RE1[Get Remote Server Config] --> RE2[Define Remote Paths];
-        RE2 --> RE3[Generate Remote Command];
+        RE1[Get Remote Server Config] --> RE1a[Define Final Remote Research Path];
+        RE1a --> RE1b[Define Remote Temp Path];
+        RE1b --> RE1c[Create Remote Temp Dir];
+        RE1c --> RE3[Generate Remote Command];
         RE3 --> RE4[Create Local Temp Script];
-        RE4 --> RE5[Prepare File Map];
-        RE5 --> RE6[Copy Files & Script to Remote];
+        RE4 --> RE5[Prepare File Map to Temp Dir];
+        RE5 --> RE6[Copy Files & Script to Remote Temp Dir];
         RE6 --> RE7[Configure Tmux for Remote];
         RE7 --> RE8{Remote Tmux Session Exists?};
         RE8 -- No --> RE9[Create Remote Tmux Session];
@@ -128,29 +130,30 @@ graph TD
 
 **Steps:**
 
-1.  **Get Remote Config:** Retrieve the `HermesConfigRemoteServer` details (hostname, username, remote\_research\_path) from the loaded `config` using `MenuSelection.selected_server_name`. Create an `SSHDestination` object.
-2.  **Define Remote Paths:**
-    *   Determine the remote session path (e.g., `{remote_research_path}/{session_name}`).
-    *   Determine the remote path for input files (e.g., `{remote_session_path}/input_files/`).
-    *   Determine the remote path for the command script (e.g., `{remote_session_path}/run_research.sh`).
-3.  **Generate Remote Command:** Use `HermesResearchCommandManager.generate_command`, providing:
-    *   The *remote* session path.
+1.  **Get Remote Config:** Retrieve the `HermesConfigRemoteServer` details (hostname, username, `remote_research_path`) from the loaded `config` using `MenuSelection.selected_server_name`. Create an `SSHDestination` object.
+2.  **Define Final Remote Research Path:** Determine the final path where Hermes will store its results on the remote server (e.g., `{remote_research_path}/{session_name}`). This path is used for the `--deep-research` argument.
+3.  **Define Remote Temp Path:** Use `PathsManager.get_remote_files_folder()` to generate a unique temporary directory path on the remote server (e.g., `/tmp/hermes_research/{uuid}/`). This path will be used for staging files.
+4.  **Create Remote Temp Dir:** Use `SSHConnectionInterface.execute_command_on_remote` to execute `mkdir -p {remote_temp_path}` on the remote server. Check for success.
+5.  **Generate Remote Command:** Use `HermesResearchCommandManager.generate_command`, providing:
+    *   The *final remote research path* (from step 2) for the `--deep-research` argument.
     *   Selected `model`, `budget`, `prompt`.
-    *   *Remote* paths for the input files (using the base names of `args.files` appended to the remote input file path).
+    *   *Remote temporary paths* for the input files (using the base names of `args.files` appended to the remote temporary path from step 3).
     *   Extra arguments (`args.extra_args`).
-4.  **Create Local Temp Script:** Create a temporary script file locally containing the generated command.
-5.  **Prepare File Map:** Create a dictionary mapping local source paths to remote target paths:
-    *   Map each absolute local input file path (`PathsManager.get_absolute_path(f)`) to its corresponding remote input file path.
-    *   Map the local temporary script path to the remote script path.
-6.  **Copy Files:** Use `RemoteCopyInterface.remote_copy_files` with the file map and the `SSHDestination`. The implementation of `RemoteCopyInterface` will handle the underlying SSH/SCP operations.
-7.  **Configure Tmux for Remote:** Use `TmuxManager.set_remote(selected_server_name)`. *Note: The `TmuxManager` implementation needs to use this server name to correctly interact with the remote machine, likely using `SSHConnectionInterface` internally.*
-8.  **Manage Remote Tmux Session:**
-    *   Use `TmuxManager.list_sessions()` (which now operates remotely) to check for existing sessions.
+6.  **Create Local Temp Script:** Create a temporary script file locally containing the generated command (from step 5).
+7.  **Prepare File Map to Temp Dir:** Create a dictionary mapping local source paths to remote *temporary* target paths:
+    *   Map each absolute local input file path (`PathsManager.get_absolute_path(f)`) to its corresponding path within the remote temporary directory (e.g., `{remote_temp_path}/{basename(f)}`).
+    *   Map the local temporary script path (from step 6) to a path within the remote temporary directory (e.g., `{remote_temp_path}/run_research.sh`). Let's call this the `remote_script_temp_path`.
+8.  **Copy Files to Remote Temp Dir:** Use `RemoteCopyInterface.remote_copy_files` with the file map (from step 7) and the `SSHDestination`.
+9.  **Configure Tmux for Remote:** Use `TmuxManager.set_remote(selected_server_name)`.
+10. **Manage Remote Tmux Session:**
+    *   Use `TmuxManager.list_sessions()` (which now operates remotely) to check for existing sessions with the target `session_name`.
     *   Handle existing sessions as in the local flow (alternative name/overwrite confirmation). Update `session_name` if needed.
     *   Use `TmuxManager.create_session(session_name)`.
-    *   Generate the command to execute the script on the remote machine (e.g., `bash {remote_script_path}`).
+    *   Generate the command to execute the script *from its temporary location* on the remote machine (e.g., `bash {remote_script_temp_path}`).
     *   Use `TmuxManager.send_command(session_name, script_execution_command)`.
-9.  **Cleanup:** Delete the local temporary script file.
+11. **Cleanup:**
+    *   Delete the local temporary script file (from step 6).
+    *   *(Optional/Future Task)* Consider adding logic to clean up the remote temporary directory (`{remote_temp_path}`) after the script starts successfully, or leave it for debugging. See TASK-004.
 
 ## Dependency Injection
 
