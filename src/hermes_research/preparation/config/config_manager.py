@@ -25,13 +25,13 @@ class ConfigManager(ConfigManagerInterface):
         self.config_path = self.paths_manager.get_config_path()
         # Ensure config exists on initialization, creating a default one if necessary
         if not os.path.exists(self.config_path):
-            self.initialize_default_config()
+            self._initialize_default_config()
 
     def _get_config_parser(self) -> configparser.ConfigParser:
         """Reads the config file and returns a ConfigParser object."""
         parser = configparser.ConfigParser()
         # Prevent ConfigParser from lowercasing keys
-        parser.optionxform = str 
+        parser.optionxform = str
         if not os.path.exists(self.config_path):
             raise FileNotFoundError(f"Configuration file not found at {self.config_path}")
         parser.read(self.config_path)
@@ -52,7 +52,7 @@ class ConfigManager(ConfigManagerInterface):
             parser = self._get_config_parser()
         except FileNotFoundError:
             # If file not found after initial check (e.g., deleted externally), re-initialize
-            self.initialize_default_config()
+            self._initialize_default_config()
             parser = self._get_config_parser()
 
 
@@ -63,7 +63,7 @@ class ConfigManager(ConfigManagerInterface):
             default_budget = int(default_budget_str)
         except ValueError:
             default_budget = 30 # Fallback to default if conversion fails
-            
+
         models_str = parser.get('general', 'models', fallback='')
         models = [model.strip() for model in models_str.split(',') if model.strip()] if models_str else []
 
@@ -156,7 +156,7 @@ class ConfigManager(ConfigManagerInterface):
             del config.remote_servers[name]
             self._save_config(config)
 
-    def initialize_default_config(self):
+    def _initialize_default_config(self):
         """Initializes and saves a default configuration file."""
         print(f"Initializing default configuration at {self.config_path}")
         default_config = HermesConfig(

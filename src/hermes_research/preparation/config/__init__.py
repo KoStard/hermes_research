@@ -21,7 +21,7 @@ class ConfigManagerInterface(ABC):
     @abstractmethod
     def load_config(self) -> HermesConfig:
         pass
-    
+
     @abstractmethod
     def add_model(self, model_name: str) -> None:
         pass
@@ -47,5 +47,5 @@ class ConfigManagerInterface(ABC):
         pass
 
     @abstractmethod
-    def initialize_default_config(self):
+    def _initialize_default_config(self):
         pass

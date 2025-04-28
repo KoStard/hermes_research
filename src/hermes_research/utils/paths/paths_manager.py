@@ -2,6 +2,8 @@ import sys
 from pathlib import Path
 from appdirs import user_config_dir
 from . import PathsManagerInterface
+import uuid
+
 
 class PathsManager(PathsManagerInterface):
     """Manages application paths, handling OS differences."""
@@ -58,3 +60,11 @@ class PathsManager(PathsManagerInterface):
 
     def get_research_session_path(self, research_parent_directory: str, session_name: str) -> str:
         return str(Path(research_parent_directory) / session_name)
+
+    def get_remote_files_folder(self):
+        session_uuid = uuid.uuid4()
+        # Construct the path string using f-string formatting
+        # Ensure a trailing slash as requested in the format /tmp/hermes_research/{uuid4}/
+        path_str = f"/tmp/{self.APP_NAME}/{session_uuid}/"
+        # Note: This doesn't create the directory, only returns the path string.
+        return path_str
