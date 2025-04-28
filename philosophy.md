@@ -6,6 +6,18 @@
 - Never try to solve vague problem directly. Instead, ask for clarifications or more information, write a high level plan and review, then break down into subproblems, create a tracker document with a checklist, and step by step solve while maintaining the tracker document.
 - Use """ for multiline strings
 
+## Project Management
+- Employ iterative development: Plan phases, deliver incrementally, and adapt based on feedback or changing requirements.
+- Define clear scope: Establish boundaries early (e.g., Charter & Scope in a project plan) and manage scope creep proactively.
+- Practice risk management: Identify potential risks, assess their impact, and define mitigation strategies upfront (e.g., Risks & Mitigation in a project plan).
+- Maintain project visibility: Use planning documents and task trackers (`tasks.md`) to ensure alignment and track progress.
+
+## Task Management
+- Follow Kanban principles: Address tasks from `tasks.md` sequentially, one at a time. Focus on completing a task before starting the next.
+- Update task status in `tasks.md` upon completion or if blocked.
+- Ensure code changes directly address the acceptance criteria of the current task.
+- For complex tasks requiring planning or design, create draft documents (e.g., markdown files) within `docs/tasks/{task_id}/` for review or clarification before implementation.
+
 ## Testing
 - Create unit tests for each package, verifying the public methods
 - Use clear naming pattern for the test names: `test_methodName_expectedBehaviour_inWhichSituation` - even if the method_name uses snake case, convert it to camelCase like methodName
