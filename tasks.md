@@ -126,7 +126,7 @@ Consider atomicity where possible. Remote cleanup commands will need to be sent 
 ### Task: Refine Remote Path Strategy
 
 **ID:** TASK-005
-**Status:** Open
+**Status:** Done
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** N/A
@@ -178,7 +178,7 @@ Consider edge cases like timeouts, host key checking, and different shell enviro
 ### Task: Implement Core CLI Execution Logic
 
 **ID:** TASK-007
-**Status:** Open
+**Status:** In Progress
 **Priority:** High
 **Assigned To:** Unassigned
 **Depends On:** TASK-001, TASK-002, TASK-003, TASK-004, TASK-005, TASK-006, TASK-008, TASK-009, TASK-010, TASK-011, TASK-012
@@ -211,14 +211,14 @@ Implement the main orchestration logic within the `HermesResearchCLI.execute` me
 *   User feedback is provided (TASK-011).
 
 **Notes:**
-This is the central task integrating most other components. Requires careful implementation following the plan.
+This is the central task integrating most other components. Requires careful implementation following the plan. Phase 1 (Local Flow) is complete. Phase 3 (Remote Flow Integration & Cleanup) is pending.
 
 ---
 
 ### Task: Implement Dependency Injection Setup
 
 **ID:** TASK-008
-**Status:** Open
+**Status:** Done
 **Priority:** High
 **Assigned To:** Unassigned
 **Depends On:** All manager implementations (or their interfaces)
@@ -240,7 +240,7 @@ Ensure that implementations requiring other managers (like `ConfigManager` needi
 ### Task: Update CLI Argument Parsing
 
 **ID:** TASK-009
-**Status:** Open
+**Status:** Done
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** N/A
@@ -263,7 +263,7 @@ Ensure the help text for the argument is clear.
 ### Task: Implement Tmux Session Name Handling
 
 **ID:** TASK-010
-**Status:** Open
+**Status:** In Progress
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** TASK-001 (for remote)
@@ -283,14 +283,14 @@ Implement the logic within `TmuxManager` (or potentially coordinated by `HermesR
 *   `TmuxManagerInterface` is updated if new methods like `determine_alternative_name` are added.
 
 **Notes:**
-Decide on the preferred strategy: automatic alternative name generation or user prompting. User prompting might be safer initially.
+Decide on the preferred strategy: automatic alternative name generation or user prompting. User prompting might be safer initially. Local handling implemented in CLI. Remote handling pending.
 
 ---
 
 ### Task: Implement User Feedback/Logging
 
 **ID:** TASK-011
-**Status:** Open
+**Status:** In Progress
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** N/A
@@ -307,14 +307,14 @@ Implement informative user feedback messages (using `print` or `logging.info`) w
 *   Standard Python `logging` module is used.
 
 **Notes:**
-Ensure consistency in message formatting.
+Ensure consistency in message formatting. Basic logging setup and local flow feedback implemented. Remote flow feedback pending.
 
 ---
 
 ### Task: Implement Optional Local Command Saving
 
 **ID:** TASK-012
-**Status:** Open
+**Status:** Done
 **Priority:** Low
 **Assigned To:** Unassigned
 **Depends On:** TASK-007 (calls save)

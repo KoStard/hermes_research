@@ -17,6 +17,7 @@
 - Update task status in `tasks.md` upon completion or if blocked.
 - Ensure code changes directly address the acceptance criteria of the current task.
 - For complex tasks requiring planning or design, create draft documents (e.g., markdown files) within `docs/tasks/{task_id}/` for review or clarification before implementation.
+- It's your responsibility to update the task statuses.
 
 ## Testing
 - Create unit tests for each package, verifying the public methods
