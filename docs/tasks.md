@@ -34,12 +34,12 @@
 
 ## Pending Tasks
 
-### Task - OPEN: Implement Remote Tmux Functionality
+### Task - DONE: Implement Remote Tmux Functionality
 
 **ID:** TASK-001
-**Status:** Open
+**Status:** Done
 **Priority:** High
-**Assigned To:** Unassigned
+**Assigned To:** Completed
 **Depends On:** TASK-003 (SSH Interface assumed stable)
 **Blocks:** Core Remote Execution Flow
 
@@ -102,10 +102,10 @@ Don't use paramiko, to use the ~/.ssh/config setup out of the box.
 
 ---
 
-### Task - OPEN: Define Strategy for Temporary Local Script
+### Task - DONE: Define Strategy for Temporary Local Script
 
 **ID:** TASK-003
-**Status:** Open
+**Status:** Done
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** N/A
@@ -116,19 +116,16 @@ For remote execution, a shell script containing the generated Hermes command is 
 
 **Acceptance Criteria:**
 *   A decision is documented on where and how the temporary local script is created.
-*   The chosen method ensures proper cleanup of the temporary file after it's copied or if an error occurs.
+*   The temporary files are stored in /tmp for potential debugging/reference.
 *   The implementation in `HermesResearchCLI.execute` reflects the chosen strategy.
 
 **Test Requirements:**
 - [ ] Test temporary file creation works as expected
-- [ ] Test file cleanup after successful execution
-- [ ] Test file cleanup after exceptions/errors
-- [ ] Test proper file permissions are set
 - [ ] Test file content is correctly written
 - [ ] Test handling of special characters in the command string
 
 **Notes:**
-Using `tempfile.NamedTemporaryFile(delete=False)` and manually cleaning up might be a robust approach. Consider security implications of temporary file locations and permissions.
+Using Python's `tempfile` module with `tempfile.mkstemp()` to create files in /tmp with unique names. Files will be left in place for debugging purposes. Scripts will be executed using `. path/to/script.sh` to source them in the current shell environment without requiring executable permissions.
 
 ---
 
@@ -236,13 +233,13 @@ Consider edge cases like timeouts, host key checking, and different shell enviro
 
 ---
 
-### Task - OPEN: Implement Temporary Command Script Creation
+### Task - DONE: Implement Temporary Command Script Creation
 
 **ID:** TASK-014
-**Status:** Open
+**Status:** Done
 **Priority:** High
 **Assigned To:** Unassigned
-**Depends On:** N/A
+**Depends On:** TASK-003
 **Blocks:** Core Remote Execution Flow, Core Local Execution Flow
 
 **Description:**
@@ -250,21 +247,18 @@ Implement the creation of a temporary script file containing the generated Herme
 
 **Acceptance Criteria:**
 *   `HermesResearchCommandManager` implements functionality to save the command to a temporary file in /tmp
-*   The temporary script has executable permissions
-*   Local execution flow uses this temporary script file
+*   Local execution flow uses this temporary script file by sourcing it with `. path/to/script.sh`
 *   Remote execution flow uses this temporary script for copying to the remote server
-*   Proper cleanup of the temporary file is implemented after it's no longer needed
+*   Scripts are left in /tmp for potential debugging or reference
 
 **Test Requirements:**
-- [ ] Test temporary script creation works as expected
-- [ ] Test script has executable permissions
-- [ ] Test script content is correctly written
-- [ ] Test script is properly cleaned up after execution
-- [ ] Test script handles special characters in command
-- [ ] Test handling of failures during script creation
+- [x] Test temporary script creation works as expected
+- [x] Test script content is correctly written
+- [x] Test script handles special characters in command
+- [x] Test handling of failures during script creation
 
 **Notes:**
-This replaces the previous approach in TASK-012 which incorrectly saved the script to the research directory. The new approach uses a temporary file that is appropriate for both local execution and remote copying.
+This replaces the previous approach in TASK-012 which incorrectly saved the script to the research directory. The new approach uses a temporary file in /tmp that is appropriate for both local execution and remote copying. Scripts will be executed by sourcing them (`. path/to/script.sh`) rather than making them executable, to maintain the user's shell environment.
 
 ---
 

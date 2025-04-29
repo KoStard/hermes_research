@@ -97,8 +97,9 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             )
             logger.debug(f"Generated Hermes command:\n{hermes_command}")
 
-            # TODO: TASK-014 - Create temporary command script in /tmp
-            # Left empty for now after reverting TASK-012 implementation
+            # Create temporary command script in /tmp (TASK-014)
+            temp_script_path = self.command_manager.create_temp_script(hermes_command)
+            logger.debug(f"Created temporary script at: {temp_script_path}")
 
             # Manage Tmux Session (TASK-010)
             self.tmux_manager.set_remote(None) # Ensure local mode
@@ -113,8 +114,8 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 self.tmux_manager.create_session(session_name)
 
                 logger.info("Sending command to tmux session...") # TASK-011 Feedback
-                # Send the command string directly
-                self.tmux_manager.send_command(session_name, hermes_command)
+                # Source the temporary script in the tmux session
+                self.tmux_manager.send_command(session_name, f". {temp_script_path}")
 
                 # Use logger.info for all user-facing messages
                 logger.info(f"\nLocal research session '{session_name}' started in tmux.")

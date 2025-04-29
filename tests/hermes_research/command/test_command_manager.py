@@ -1,3 +1,4 @@
+import os
 import pytest
 from unittest.mock import patch, mock_open
 from hermes_research.command.command_manager import HermesResearchCommandManager
@@ -96,3 +97,48 @@ class TestHermesResearchCommandManager:
     --textual_file "/path/to/file1.txt" \\
     --another-arg "value" --flag"""
         assert result == expected_command
+        
+    def test_saveCommandInFile_savesContent_toSpecifiedPath(self, command_manager, tmp_path):
+        """Test that the command is correctly saved to the specified file path."""
+        # Arrange
+        command = "hermes chat --model claude-3-opus --deep-research /path/to/research"
+        file_path = str(tmp_path / "test_command.sh")
+        
+        # Act
+        command_manager.save_command_in_file(command, file_path)
+        
+        # Assert
+        assert os.path.exists(file_path)
+        with open(file_path, 'r') as f:
+            content = f.read()
+        assert content == command
+
+    def test_saveCommandInFile_createsDirectories_whenNotExisting(self, command_manager, tmp_path):
+        """Test that directories are created if they don't exist."""
+        # Arrange
+        command = "hermes chat --model claude-3-opus"
+        nested_dir = tmp_path / "nested" / "dirs"
+        file_path = str(nested_dir / "test_command.sh")
+        
+        # Act
+        command_manager.save_command_in_file(command, file_path)
+        
+        # Assert
+        assert os.path.exists(file_path)
+        with open(file_path, 'r') as f:
+            content = f.read()
+        assert content == command
+
+    def test_saveCommandInFile_handlesSpecialCharacters_inCommandString(self, command_manager, tmp_path):
+        """Test that special characters in the command are properly saved."""
+        # Arrange
+        command = 'hermes chat --text "Complex prompt with $special & \\"quoted\\" characters"'
+        file_path = str(tmp_path / "special_command.sh")
+        
+        # Act
+        command_manager.save_command_in_file(command, file_path)
+        
+        # Assert
+        with open(file_path, 'r') as f:
+            content = f.read()
+        assert content == command
