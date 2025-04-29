@@ -154,5 +154,3 @@ class TmuxManager(TmuxManagerInterface):
                 error_message = f"Failed to kill tmux session '{name}'. Stderr: {stderr.strip()}"
                 logger.error(error_message)
                 raise RuntimeError(error_message) # Raise an error on failure
-
-    # Removed determine_alternative_name as per thought process - CLI handles this

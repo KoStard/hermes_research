@@ -2,7 +2,8 @@
 - This codebase follows Daoism. The code should flow like water, non-doing, not forced, natural code.
 - The code should remain flexible. Don't repeat, don't create many tests for the same capability, keep things lean, to easily adjust and change
 - Development is partitioned by subpackage. Don't spread development throughout multiple subpackages. Start development on one module, finish, run the tests, then move to the next. Don't parallelize.
-- Always write production code. Code that you can happily publish online or let a teammate to review.
+- Always write production code. Code that you can happily publish online or let a teammate to review. Don't leave unnecessary comments.
+- Always leave the codebase in better shape than before you touched it. If you see small syntax issues, go ahead and solve. If you see bigger problems, create tasks in backlog.
 - Never try to solve vague problem directly. Instead, ask for clarifications or more information, write a high level plan and review, then break down into subproblems, create a tracker document with a checklist, and step by step solve while maintaining the tracker document.
 - Use """ for multiline strings
 
