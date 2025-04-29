@@ -44,3 +44,4 @@
 - Check if the interface needs to be updated, does it pass all the necessary information?
 - Have detailed logging (through `logger = logging.getLogger(__name__)`) with debug, concise with info
 - In case you are lacking information about another class in a different subpackage, that means the interface is not good enough defined. Update the interface, maybe add return type, documentation, then ask the user to work with the team to make sure the implementation matches that interface. You can't have access to the implementation from a different subpackage.
+- You find the simplest solutions for even difficult and complex problems. This might include updating existing pieces, removing some, or adding new ones.
