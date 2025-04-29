@@ -8,7 +8,8 @@ from hermes_research.preparation.menu.hermes_research_menu import HermesResearch
 from hermes_research.command.command_manager import HermesResearchCommandManager
 from hermes_research.tmux.tmux_manager import TmuxManager
 from hermes_research.tmux.ssh.subprocess_ssh_connection import SubprocessSSHConnection
-# from hermes_research.remote_copy.scp_remote_copy import SCPRemoteCopy # TASK-002 Placeholder
+from hermes_research.remote_copy.scp_remote_copy import SCPRemoteCopy
+from hermes_research.session_name.session_name_manager import SessionNameManager
 from hermes_research.preparation.cli.hermes_research_cli import HermesResearchCLI
 
 # Configure logging (Basic setup) - TASK-011
@@ -23,8 +24,9 @@ def main():
     menu = HermesResearchMenu()
     command_manager = HermesResearchCommandManager()
     ssh_connection = SubprocessSSHConnection()
-    # remote_copy = SCPRemoteCopy(ssh_connection=ssh_connection) # TASK-002 Placeholder
+    remote_copy = SCPRemoteCopy(ssh_connection=ssh_connection)
     tmux_manager = TmuxManager(ssh_connection=ssh_connection) # SSH needed even if not remote initially for interface
+    session_name_manager = SessionNameManager(tmux_manager=tmux_manager)
 
     # Instantiate the main CLI class with dependencies
     cli = HermesResearchCLI(
@@ -33,8 +35,10 @@ def main():
         menu=menu,
         command_manager=command_manager,
         tmux_manager=tmux_manager,
-        # remote_copy=remote_copy, # TASK-002 Placeholder
-        ssh_connection=ssh_connection
+        remote_copy=remote_copy,
+        ssh_connection=ssh_connection,
+
+        session_name_manager=session_name_manager
     )
 
     parser = ArgumentParser()
