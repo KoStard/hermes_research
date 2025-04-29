@@ -209,7 +209,7 @@ class TestHermesResearchCLI:
         # Check command was sent to remote tmux
         mock_dependencies["tmux_manager"].send_command.assert_called_with(
             session_name_arg,  # Use the actual session name that was passed
-            f"bash /tmp/hermes_research/uuid/run_research.sh"
+            f". /tmp/hermes_research/uuid/run_research.sh"
         )
     
     def test_execute_handlesSSHConnectionFailure_inRemoteFlow(self, cli, mock_dependencies, args, remote_selection):

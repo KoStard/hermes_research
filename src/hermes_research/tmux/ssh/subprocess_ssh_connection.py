@@ -150,7 +150,7 @@ class SubprocessSSHConnection(SSHConnectionInterface):
             )
             
             if result.returncode == 0:
-                logger.info(f"Remote command executed successfully on {destination.username}@{destination.hostname}.")
+                logger.debug(f"Remote command executed successfully on {destination.username}@{destination.hostname}.")
             else:
                 err_msg = result.stderr.strip()
                 logger.warning(f"Remote command failed on {destination.username}@{destination.hostname}. Command: '{command}'. Return code: {result.returncode}")

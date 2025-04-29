@@ -149,7 +149,6 @@ class HermesResearchMenu(HermesResearchMenuInterface):
                 prompt=prompt_text,
                 selected_server_name=selected_server_name
             )
-            logger.info(f"Menu selection completed: {selection}")
             return selection
 
         except KeyboardInterrupt:

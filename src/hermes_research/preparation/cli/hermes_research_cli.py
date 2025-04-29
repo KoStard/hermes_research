@@ -178,7 +178,6 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 if not self.ssh_connection.test_connection(ssh_destination):
                     logger.error(f"SSH connection to {remote_config.username}@{remote_config.hostname} failed.")
                     return
-                logger.info("Success.")
                 
                 # 4. Create Remote Temp Dir (SSH)
                 logger.info(f"Creating remote temporary directory on {remote_config.hostname}:{remote_temp_dir}...")
@@ -240,7 +239,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 logger.info("Sending command to remote tmux session...")
                 # Execute the remote script
                 logger.info(f"Executing script on {remote_config.hostname}...")
-                self.tmux_manager.send_command(session_name, f"bash {remote_script_path}")
+                self.tmux_manager.send_command(session_name, f". {remote_script_path}")
                 
                 # Success message with connection instructions
                 logger.info(f"Remote research session '{session_name}' started on '{remote_config.hostname}'.")

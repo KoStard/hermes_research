@@ -149,7 +149,7 @@ graph TD
     *   Use `TmuxManager.list_sessions()` (which now operates remotely) to check for existing sessions with the target `session_name`.
     *   Handle existing sessions as in the local flow (alternative name/overwrite confirmation). Update `session_name` if needed.
     *   Use `TmuxManager.create_session(session_name)`.
-    *   Generate the command to execute the script *from its temporary location* on the remote machine (e.g., `bash {remote_script_temp_path}`).
+    *   Generate the command to execute the script *from its temporary location* on the remote machine (e.g., `. {remote_script_temp_path}`).
     *   Use `TmuxManager.send_command(session_name, script_execution_command)`.
 11. **Cleanup:**
     *   Delete the local temporary script file (from step 6).
