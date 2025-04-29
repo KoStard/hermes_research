@@ -6,11 +6,12 @@ from argparse import ArgumentParser, Namespace
 from hermes_research.preparation.cli import HermesResearchCLIInterface
 from hermes_research.utils.paths import PathsManagerInterface
 from hermes_research.preparation.config import ConfigManagerInterface
-from hermes_research.preparation.menu import HermesResearchMenuInterface
+from hermes_research.preparation.menu import HermesResearchMenuInterface, MenuSelection
 from hermes_research.command import HermesResearchCommandManagerInterface
 from hermes_research.tmux import TmuxManagerInterface
 from hermes_research.remote_copy import RemoteCopyInterface # Needed for constructor signature
-from hermes_research.tmux.ssh import SSHConnectionInterface # Needed for constructor signature
+from hermes_research.tmux.ssh import SSHConnectionInterface, SSHDestination # Needed for constructor signature
+from hermes_research.session_name import SessionNameManagerInterface
 
 # Concrete classes / helpers
 from hermes_research.preparation.menu.menu_manager import MenuManager # For prompts
@@ -27,7 +28,8 @@ class HermesResearchCLI(HermesResearchCLIInterface):
         command_manager: HermesResearchCommandManagerInterface,
         tmux_manager: TmuxManagerInterface,
         # remote_copy: RemoteCopyInterface, # TASK-002 Placeholder
-        ssh_connection: SSHConnectionInterface # TASK-006 Placeholder for remote flow
+        ssh_connection: SSHConnectionInterface, # TASK-006 Placeholder for remote flow
+        session_name_manager: SessionNameManagerInterface
     ):
         self.paths_manager = paths_manager
         self.config_manager = config_manager
@@ -36,6 +38,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
         self.tmux_manager = tmux_manager
         # self.remote_copy = remote_copy # TASK-002 Placeholder
         self.ssh_connection = ssh_connection # TASK-006 Placeholder for remote flow
+        self.session_name_manager = session_name_manager
         logger.debug("HermesResearchCLI initialized with dependencies.")
 
     def define_cli(self, parser: ArgumentParser):
@@ -47,6 +50,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             type=str,
             default=""
         )
+
 
     def execute(self, args: Namespace):
         """Orchestrates the research task setup and execution."""
@@ -98,48 +102,11 @@ class HermesResearchCLI(HermesResearchCLIInterface):
 
             # Manage Tmux Session (TASK-010)
             self.tmux_manager.set_remote(None) # Ensure local mode
-            original_session_name = session_name
-            while self.tmux_manager.session_exists(session_name):
-                logger.warning(f"Tmux session '{session_name}' already exists.")
-                # Use logger instead of print for user messages
-                action = MenuManager.selection_menu(
-                    f"Tmux session '{session_name}' already exists.",
-                    ["Kill existing session and proceed", "Enter a new session name", "Cancel"],
-                    allow_cancel=False # Force a choice here
-                )
-                if action == 0: # Kill and proceed
-                    logger.info(f"User chose to kill existing session '{session_name}'.")
-                    try:
-                        self.tmux_manager.kill_session(session_name)
-                        break # Exit loop, proceed with original name
-                    except Exception as e:
-                        logger.error(f"Failed to kill session '{session_name}': {e}")
-                        logger.error(f"Could not kill existing session '{session_name}'.")
-                        # Ask again or cancel? Let's ask again.
-                        continue
-                elif action == 1: # Enter new name
-                    try:
-                        new_name = MenuManager.text_prompt("Enter new session name: ")
-                        # Basic validation - reuse menu's validation logic if possible, or simple check here
-                        if new_name and not self.tmux_manager.session_exists(new_name):
-                             session_name = new_name
-                             logger.info(f"Using new session name: '{session_name}'")
-                             # Update local_session_path if it depends on session_name and hasn't been created yet?
-                             # The command was already generated with the original name path.
-                             # This is complex. For now, let's assume the path created by save_command uses the *original* name.
-                             # The tmux session name is separate. This might need refinement later.
-                             logger.warning(f"Research files will still be in '{original_session_name}' directory.")
-                             break # Exit loop, proceed with new name
-                        elif not new_name:
-                             logger.error("Session name cannot be empty.")
-                        else:
-                             logger.error(f"Session '{new_name}' also exists.")
-                    except KeyboardInterrupt:
-                         raise # Propagate cancellation
-                else: # Cancel
-                    logger.warning("User cancelled due to existing tmux session.")
-                    logger.info("Operation cancelled.")
-                    return
+            try:
+                session_name = self.session_name_manager.handle_session_name_conflict(session_name, is_remote=False)
+            except KeyboardInterrupt:
+                logger.info("Operation cancelled.")
+                return
 
             try:
                 logger.info(f"Creating tmux session '{session_name}'...") # TASK-011 Feedback
@@ -172,6 +139,32 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             # 7. Prepare File Map
             # 8. Copy Files (RemoteCopy)
             # 9. Configure Tmux for Remote
-            # 10. Manage Remote Tmux Session (check exists, create, send command - execute script)
+            remote_config = config.remote_servers.get(selection.selected_server_name)
+            if remote_config:
+                # Create SSH destination from config
+                ssh_destination = SSHDestination(
+                    username=remote_config.username,
+                    hostname=remote_config.hostname
+                )
+                self.tmux_manager.set_remote(ssh_destination)
+                
+                # 10. Manage Remote Tmux Session (check exists, create, send command - execute script)
+                try:
+                    session_name = self.session_name_manager.handle_session_name_conflict(
+                        session_name, 
+                        is_remote=True,
+                        server_name=selection.selected_server_name
+                    )
+                except KeyboardInterrupt:
+                    logger.info("Operation cancelled.")
+                    # TODO: Cleanup any temporary files created for remote execution
+                    return
+                
+                # Continue with remote command execution...
+                logger.info("Remote tmux session handling implemented, but full remote execution not yet available.")
+            else:
+                logger.error(f"Remote server '{selection.selected_server_name}' configuration not found.")
+                return
+            
             # 11. Cleanup Local Temp Script
             pass

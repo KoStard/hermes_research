@@ -19,11 +19,13 @@
 - For complex tasks requiring planning or design, create draft documents (e.g., markdown files) within `docs/tasks/{task_id}/` for review or clarification before implementation.
 - It's your responsibility to update the task statuses.
 - Work only on one task at a time.
+- For requests without existing tasks, always create a task and track it there.
 
 ## Testing
 - Create unit tests for each package, verifying the public methods
 - Use clear naming pattern for the test names: `test_methodName_expectedBehaviour_inWhichSituation` - even if the method_name uses snake case, convert it to camelCase like methodName
 - Test-driven development - write the unit test for the capability you want, then implement
+- Remember, code needs to be written testable, not all code is testable.
 - For testing using pytest, use fixtures if needed
 - In the tests write dummy data, never put real paths/names/data
 - When checking strings, verify the whole string at once, don't just check pieces. Use multiline text blocks if needed. So write only one assert if you anyway want to verify the whole string.

@@ -30,7 +30,3 @@ class TmuxManagerInterface(ABC):
     def kill_session(self, name: str):
         """Kills the tmux session with the given name."""
         pass
-
-    # @abstractmethod # Removed as per thought process - CLI will handle prompting
-    # def determine_alternative_name(self, rejected_session_name: str) -> str:
-    #     pass
