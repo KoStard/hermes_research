@@ -3,10 +3,10 @@
 ## Task Template
 
 ```markdown
-### Task: [Short Title]
+### Task - [STATUS]: [Short Title]
 
 **ID:** TASK-XXX 
-**Status:** Open | In Progress | Blocked | Done
+**Status:** Open | In Progress | Blocked | Done | Cancelled
 **Priority:** High | Medium | Low
 **Assigned To:** Unassigned
 **Depends On:** [List Task IDs or N/A]
@@ -19,6 +19,12 @@
 *   [Criterion 1]
 *   [Criterion 2]
 *   ...
+
+**Test Requirements:**
+- [ ] [Unit test for functionality 1]
+- [ ] [Integration test for scenario 1]
+- [ ] [Edge case test for situation 1]
+- [ ] ...
 
 **Notes:**
 [Any additional notes, links, or considerations.]
@@ -48,6 +54,15 @@ The `TmuxManager` needs to be extended or refactored to support executing tmux c
 *   Appropriate error handling for SSH connection failures is implemented.
 *   Unit tests verify remote functionality (potentially using mocking for SSH).
 
+**Test Requirements:**
+- [ ] Test `set_remote()` correctly configures TmuxManager for remote operations
+- [ ] Test `list_sessions()` returns sessions from the remote host
+- [ ] Test `create_session()` creates a tmux session remotely
+- [ ] Test `send_command()` sends commands to the remote tmux session
+- [ ] Test error handling for SSH connection failures
+- [ ] Test error handling for tmux command failures on remote host
+- [ ] Test with mock SSH connection to verify proper command formation
+
 **Notes:**
 The current `TmuxManager` implementation only handles local tmux. The interaction with `SSHConnectionInterface` needs careful design.
 
@@ -72,6 +87,16 @@ Create a concrete implementation of the `RemoteCopyInterface`. This implementati
 *   Directory creation on the remote host is handled if target paths don't exist.
 *   Unit tests verify the copy functionality (potentially using mocking for SSH/SCP).
 
+**Test Requirements:**
+- [ ] Test `remote_copy_files()` successfully copies files to remote destination
+- [ ] Test handling of non-existent target directories (auto-creation)
+- [ ] Test error handling for connection failures
+- [ ] Test error handling for permission issues
+- [ ] Test error handling for invalid source paths
+- [ ] Test with mock SSH connection to verify proper command formation
+- [ ] Test handling of large files (performance test)
+- [ ] Test handling of multiple files in a single operation
+
 **Notes:**
 Don't use paramiko, to use the ~/.ssh/config setup out of the box.
 
@@ -93,6 +118,14 @@ For remote execution, a shell script containing the generated Hermes command is 
 *   A decision is documented on where and how the temporary local script is created.
 *   The chosen method ensures proper cleanup of the temporary file after it's copied or if an error occurs.
 *   The implementation in `HermesResearchCLI.execute` reflects the chosen strategy.
+
+**Test Requirements:**
+- [ ] Test temporary file creation works as expected
+- [ ] Test file cleanup after successful execution
+- [ ] Test file cleanup after exceptions/errors
+- [ ] Test proper file permissions are set
+- [ ] Test file content is correctly written
+- [ ] Test handling of special characters in the command string
 
 **Notes:**
 Using `tempfile.NamedTemporaryFile(delete=False)` and manually cleaning up might be a robust approach. Consider security implications of temporary file locations and permissions.
@@ -117,6 +150,16 @@ Analyze the resources created during both local and remote execution flows (e.g.
 *   Cleanup logic handles both successful completion and various failure scenarios.
 *   The remote temporary directory is reliably removed after the remote command is successfully launched in tmux or if an error occurs during setup.
 *   User feedback upon errors is clear and informative.
+
+**Test Requirements:**
+- [ ] Test cleanup after successful execution (both local and remote)
+- [ ] Test cleanup after SSH connection failure
+- [ ] Test cleanup after file copy failure
+- [ ] Test cleanup after tmux command failure
+- [ ] Test cleanup after user cancellation at different stages
+- [ ] Test error message clarity and helpfulness
+- [ ] Test proper handling of resource cleanup sequence
+- [ ] Test cleanup with debug flag that preserves temporary files
 
 **Notes:**
 Consider atomicity where possible. Remote cleanup commands will need to be sent via SSH. The cleanup of the remote temporary directory should ideally happen after the `tmux send-command` for the script execution is confirmed successful, or within error handling blocks.
@@ -146,6 +189,14 @@ Ensure the `PathsManager` interface and implementation correctly support generat
 *   `HermesResearchCLI.execute` uses the `PathsManager` methods correctly for both local and remote scenarios.
 *   `HermesResearchCommandManager.generate_command` correctly uses the final research path for `--deep-research` and the appropriate (local absolute or remote temporary) paths for `--textual_file` arguments based on the context.
 
+**Test Requirements:**
+- [x] Test local research session path construction
+- [x] Test remote final path construction with various session names
+- [x] Test remote temporary path generation uniqueness
+- [x] Test path construction with special characters in names
+- [x] Test path normalization for different operating systems
+- [x] Test command generation with correct paths for both contexts
+
 **Notes:**
 The existing `PathsManager` methods seem largely sufficient. This task focuses on ensuring they are correctly *applied* within the CLI and Command Manager logic for both local and remote flows as detailed in the implementation plan.
 
@@ -170,12 +221,54 @@ Ensure a robust implementation of `SSHConnectionInterface` exists. The current `
 *   Authentication methods are considered (initially focusing on key-based auth assumed configured system-wide).
 *   Comprehensive unit tests cover various scenarios.
 
+**Test Requirements:**
+- [ ] Test successful command execution with mock subprocess
+- [ ] Test connection testing with various return scenarios
+- [ ] Test handling of timeout conditions
+- [ ] Test handling of authentication failures
+- [ ] Test handling of host key verification failures
+- [ ] Test with varied return codes and stderr messages
+- [ ] Test command execution with special characters
+- [ ] Test handling of large command output
+
 **Notes:**
 Consider edge cases like timeouts, host key checking, and different shell environments on the remote host. Using a library like Paramiko could be an alternative to `subprocess`.
 
 ---
 
-### Task: Implement Core CLI Execution Logic
+### Task: Implement Temporary Command Script Creation
+
+**ID:** TASK-014
+**Status:** Open
+**Priority:** High
+**Assigned To:** Unassigned
+**Depends On:** N/A
+**Blocks:** Core Remote Execution Flow, Core Local Execution Flow
+
+**Description:**
+Implement the creation of a temporary script file containing the generated Hermes command in the /tmp directory for both local and remote execution flows. For local execution, this temporary script will be executed directly. For remote execution, it will be copied to the remote server before execution.
+
+**Acceptance Criteria:**
+*   `HermesResearchCommandManager` implements functionality to save the command to a temporary file in /tmp
+*   The temporary script has executable permissions
+*   Local execution flow uses this temporary script file
+*   Remote execution flow uses this temporary script for copying to the remote server
+*   Proper cleanup of the temporary file is implemented after it's no longer needed
+
+**Test Requirements:**
+- [ ] Test temporary script creation works as expected
+- [ ] Test script has executable permissions
+- [ ] Test script content is correctly written
+- [ ] Test script is properly cleaned up after execution
+- [ ] Test script handles special characters in command
+- [ ] Test handling of failures during script creation
+
+**Notes:**
+This replaces the previous approach in TASK-012 which incorrectly saved the script to the research directory. The new approach uses a temporary file that is appropriate for both local execution and remote copying.
+
+---
+
+### Task - IN PROGRESS: Implement Core CLI Execution Logic
 
 **ID:** TASK-007
 **Status:** In Progress
@@ -210,12 +303,25 @@ Implement the main orchestration logic within the `HermesResearchCLI.execute` me
 *   Error handling and resource cleanup are implemented (TASK-004).
 *   User feedback is provided (TASK-011).
 
+**Test Requirements:**
+- [x] Test configuration loading in CLI.execute()
+- [ ] Test local flow execution end-to-end
+- [ ] Test remote flow execution end-to-end
+- [ ] Test correct branching between local and remote flows
+- [ ] Test error handling in local flow
+- [ ] Test error handling in remote flow
+- [ ] Test session name handling and verification
+- [ ] Test file mapping for remote copy
+- [ ] Test command generation with correct paths
+- [ ] Test remote temporary directory handling
+- [ ] Test cleanup processes for both flows
+
 **Notes:**
 This is the central task integrating most other components. Requires careful implementation following the plan. Phase 1 (Local Flow) is complete. Phase 3 (Remote Flow Integration & Cleanup) is pending.
 
 ---
 
-### Task: Implement Dependency Injection Setup
+### Task - DONE: Implement Dependency Injection Setup
 
 **ID:** TASK-008
 **Status:** Done
@@ -232,12 +338,19 @@ Set up the dependency injection mechanism in the application's entry point (`src
 *   These instances are passed to the `HermesResearchCLI` constructor.
 *   The application runs without errors related to missing dependencies.
 
+**Test Requirements:**
+- [x] Test main.py instantiates all required components
+- [x] Test dependency order is correct (dependents after dependencies)
+- [x] Test CLI construction with all dependencies injected
+- [x] Test application startup with minimal configuration
+- [x] Test error handling for missing/misconfigured dependencies
+
 **Notes:**
 Ensure that implementations requiring other managers (like `ConfigManager` needing `PathsManager`) are instantiated correctly.
 
 ---
 
-### Task: Update CLI Argument Parsing
+### Task - DONE: Update CLI Argument Parsing
 
 **ID:** TASK-009
 **Status:** Done
@@ -255,12 +368,19 @@ Update the `HermesResearchCLI.define_cli` method to include the optional `-c` or
 *   The value is passed to `HermesResearchCommandManager.generate_command`.
 *   The `hermes-research --help` output shows the new argument.
 
+**Test Requirements:**
+- [x] Test CLI parser includes command-args option
+- [x] Test help output shows the new argument with clear description
+- [x] Test default value is set correctly
+- [x] Test passing argument value works as expected
+- [x] Test command-args is properly passed to generate_command
+
 **Notes:**
 Ensure the help text for the argument is clear.
 
 ---
 
-### Task: Implement Tmux Session Name Handling
+### Task - IN PROGRESS: Implement Tmux Session Name Handling
 
 **ID:** TASK-010
 **Status:** In Progress
@@ -282,12 +402,21 @@ Implement the logic within `TmuxManager` (or potentially coordinated by `HermesR
 *   The logic works for both local and remote tmux sessions (leveraging TASK-001).
 *   `TmuxManagerInterface` is updated if new methods like `determine_alternative_name` are added.
 
+**Test Requirements:**
+- [x] Test detection of existing tmux sessions
+- [ ] Test user prompting for session management choices
+- [ ] Test handling when user chooses to overwrite existing session
+- [ ] Test handling when user chooses to use alternative name
+- [ ] Test automatic alternative name generation logic
+- [ ] Test functionality works for remote tmux sessions
+- [ ] Test consistent session name is used for send_command after resolution
+
 **Notes:**
 Decide on the preferred strategy: automatic alternative name generation or user prompting. User prompting might be safer initially. Local handling implemented in CLI. Remote handling pending.
 
 ---
 
-### Task: Implement User Feedback/Logging
+### Task - IN PROGRESS: Implement User Feedback/Logging
 
 **ID:** TASK-011
 **Status:** In Progress
@@ -306,15 +435,24 @@ Implement informative user feedback messages (using `print` or `logging.info`) w
 *   Debug logging provides detailed information for troubleshooting.
 *   Standard Python `logging` module is used.
 
+**Test Requirements:**
+- [x] Test basic logging setup works correctly
+- [x] Test local flow prints appropriate user messages
+- [ ] Test remote flow prints appropriate user messages
+- [x] Test error messages are clear and helpful
+- [x] Test debug logging captures detailed information
+- [ ] Test log messages match expected format from use case docs
+- [ ] Test consistent formatting across all message types
+
 **Notes:**
 Ensure consistency in message formatting. Basic logging setup and local flow feedback implemented. Remote flow feedback pending.
 
 ---
 
-### Task: Implement Optional Local Command Saving
+### Task - CANCELLED: Implement Optional Local Command Saving
 
 **ID:** TASK-012
-**Status:** Done
+**Status:** Cancelled
 **Priority:** Low
 **Assigned To:** Unassigned
 **Depends On:** TASK-007 (calls save)
@@ -328,12 +466,20 @@ Implement the functionality to save the generated `hermes` command to a script f
 *   The file saving happens before sending the command to tmux.
 *   Directory creation for the session path is handled correctly (likely by `save_command_in_file` or ensured before calling it).
 
+**Test Requirements:**
+- [ ] Test command is correctly saved to file
+- [ ] Test file is saved in the correct location
+- [ ] Test directory is created if it doesn't exist
+- [ ] Test file has correct permissions (executable)
+- [ ] Test file content matches the command sent to tmux
+- [ ] Test handling of special characters in commands
+
 **Notes:**
 This provides a record of the command run. Consider making this behavior configurable later if needed.
 
 ---
 
-### Task: Create Project Plan
+### Task - DONE: Create Project Plan
 
 **ID:** TASK-013
 **Status:** Done
@@ -351,6 +497,14 @@ Analyze the existing tasks (TASK-001 to TASK-012) and project documentation (`cl
 *   The plan provides a logical order for tackling the existing implementation tasks.
 *   Key risks and mitigation strategies are identified.
 *   Open questions requiring clarification are listed.
+
+**Test Requirements:**
+- [x] Verify project plan document exists in correct location
+- [x] Verify all required sections are included
+- [x] Verify dependencies match those in task definitions
+- [x] Verify timeline is realistic based on task complexity
+- [x] Verify risks have appropriate mitigation strategies
+- [x] Verify plan follows project philosophy guidelines
 
 **Notes:**
 This task provides the strategic overview needed to execute the subsequent implementation tasks efficiently.

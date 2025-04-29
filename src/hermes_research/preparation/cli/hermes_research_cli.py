@@ -94,17 +94,8 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             )
             logger.debug(f"Generated Hermes command:\n{hermes_command}")
 
-            # Save command script locally (TASK-012)
-            # Path creation is handled by save_command_in_file (TASK-005 refinement)
-            script_filename = "run_research.sh"
-            local_script_path = os.path.join(local_session_path, script_filename)
-            try:
-                self.command_manager.save_command_in_file(hermes_command, local_script_path)
-                logger.info(f"Command saved to {local_script_path}")
-            except OSError as e:
-                 logger.error(f"Failed to save command script to {local_script_path}: {e}")
-                 print(f"Error: Could not write command script to {local_script_path}. Check permissions.")
-                 return # Stop execution if we can't save the script
+            # TODO: TASK-014 - Create temporary command script in /tmp
+            # Left empty for now after reverting TASK-012 implementation
 
             # Manage Tmux Session (TASK-010)
             self.tmux_manager.set_remote(None) # Ensure local mode

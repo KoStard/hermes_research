@@ -40,20 +40,6 @@ class HermesResearchCommandManager(HermesResearchCommandManagerInterface):
 
         # Join with line continuation for readability
         return " \\\n    ".join(command_parts)
-    def save_command_in_file(self, command, path):
-        """
-        Save the command to the specified file, creating directories if needed.
-        
-        Args:
-            command: The command string to save
-            path: The file path where to save the command (e.g., /path/to/research/session_name/run_script.sh)
-        """
-        # Ensure the full directory structure exists, including the parent research dir
-        directory = os.path.dirname(path)
-        if directory: # Ensure directory is not empty (e.g., if path is just a filename)
-             # This will create both the parent (e.g., /path/to/research) and the session dir (session_name) if they don't exist
-             os.makedirs(directory, exist_ok=True)
 
-        # Write command to file
-        with open(path, 'w') as file:
-            file.write(command)
+    def save_command_in_file(self, command, path):
+        pass
