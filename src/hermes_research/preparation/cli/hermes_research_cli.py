@@ -27,8 +27,8 @@ class HermesResearchCLI(HermesResearchCLIInterface):
         menu: HermesResearchMenuInterface,
         command_manager: HermesResearchCommandManagerInterface,
         tmux_manager: TmuxManagerInterface,
-        # remote_copy: RemoteCopyInterface, # TASK-002 Placeholder
-        ssh_connection: SSHConnectionInterface, # TASK-006 Placeholder for remote flow
+        remote_copy: RemoteCopyInterface,
+        ssh_connection: SSHConnectionInterface,
         session_name_manager: SessionNameManagerInterface
     ):
         self.paths_manager = paths_manager
@@ -36,7 +36,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
         self.menu = menu
         self.command_manager = command_manager
         self.tmux_manager = tmux_manager
-        # self.remote_copy = remote_copy # TASK-002 Placeholder
+        self.remote_copy = remote_copy
         self.ssh_connection = ssh_connection # TASK-006 Placeholder for remote flow
         self.session_name_manager = session_name_manager
         logger.debug("HermesResearchCLI initialized with dependencies.")
@@ -153,12 +153,15 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             remote_temp_dir = self.paths_manager.get_remote_files_folder()
             logger.debug(f"Remote temporary directory: {remote_temp_dir}")
             
-            # 5. Generate Remote Command (placeholder - actual implementation should use correct paths)
+            # Initialize remote file paths list before using it
+            remote_file_paths = []
+            
+            # 5. Generate Remote Command with remote file paths
             logger.info("Generating remote command script...")
             hermes_command = self.command_manager.generate_command(
                 path_to_research=remote_research_path,  # Use remote path for --deep-research
                 model=selection.model,
-                files=[],  # Will be populated with paths inside the remote temp dir
+                files=remote_file_paths,  # Use remote paths for files
                 budget=selection.budget,
                 prompt=selection.prompt,
                 extra_arguments=extra_args
@@ -187,17 +190,31 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                     logger.error(f"Failed to create remote temporary directory: {stderr}")
                     return
                 
-                # 7 & 8. Prepare File Map and Copy Files (RemoteCopy) - Placeholder
+                # 7 & 8. Prepare File Map and Copy Files
+                source_to_target_paths_map = {}
+                remote_file_paths = []  # Track remote paths for command generation
+            
+                # Map original files
                 for file_path in absolute_file_paths:
                     file_name = os.path.basename(file_path)
                     remote_file_path = os.path.join(remote_temp_dir, file_name)
-                    logger.info(f"Copying {file_name} to {remote_config.hostname}:{remote_file_path}...")
-                    # Actual copy would happen here with RemoteCopy
-                
-                # Copy script to remote
+                    source_to_target_paths_map[file_path] = remote_file_path
+                    remote_file_paths.append(remote_file_path)
+                    logger.debug(f"Mapping: {file_path} -> {remote_file_path}")
+            
+                # Add script to map
                 remote_script_path = os.path.join(remote_temp_dir, "run_research.sh")
-                logger.info(f"Copying run script to {remote_config.hostname}:{remote_script_path}...")
-                # Actual copy would happen here with RemoteCopy
+                source_to_target_paths_map[temp_script_path] = remote_script_path
+                logger.debug(f"Mapping script: {temp_script_path} -> {remote_script_path}")
+            
+                # Execute copy operation
+                logger.info(f"Copying files to {remote_config.hostname}...")
+                try:
+                    self.remote_copy.remote_copy_files(source_to_target_paths_map, ssh_destination)
+                    logger.info("All files copied successfully.")
+                except Exception as e:
+                    logger.error(f"Failed to copy files to remote server: {e}")
+                    return  # Exit if file copying fails
                 
                 # 9. Configure Tmux for Remote
                 logger.info(f"Configuring tmux for remote server '{selection.selected_server_name}'...")
@@ -221,8 +238,9 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 
                 # Send command to remote tmux session
                 logger.info("Sending command to remote tmux session...")
-                # In actual implementation, this would execute the remote script
-                self.tmux_manager.send_command(session_name, f". {remote_script_path}")
+                # Execute the remote script
+                logger.info(f"Executing script on {remote_config.hostname}...")
+                self.tmux_manager.send_command(session_name, f"bash {remote_script_path}")
                 
                 # Success message with connection instructions
                 logger.info(f"Remote research session '{session_name}' started on '{remote_config.hostname}'.")
@@ -230,11 +248,20 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 
             except Exception as e:
                 logger.error(f"An error occurred during remote execution: {e}")
-                # Here we would implement cleanup of remote resources
+                # Cleanup remote temporary directory (optional - leaving for debugging)
+                # The following lines could be uncommented to clean up remote temp dir
+                # logger.debug(f"Cleaning up remote temporary directory: {remote_temp_dir}")
+                # cleanup_cmd = f"rm -rf {remote_temp_dir}"
+                # self.ssh_connection.execute_command_on_remote(cleanup_cmd, ssh_destination)
                 return
             finally:
                 # 11. Cleanup Local Temp Script
                 if os.path.exists(temp_script_path):
                     logger.debug(f"Cleaning up local temporary script: {temp_script_path}")
-                    # In actual implementation, we might want to keep this for debugging
-                    # os.unlink(temp_script_path)
+                    # Clean up the local temporary script
+                    try:
+                        if os.path.exists(temp_script_path):
+                            os.unlink(temp_script_path)
+                            logger.debug(f"Removed local temporary script: {temp_script_path}")
+                    except Exception as e:
+                        logger.warning(f"Failed to remove temporary script {temp_script_path}: {e}")

@@ -265,7 +265,7 @@ This replaces the previous approach in TASK-012 which incorrectly saved the scri
 ### Task - IN PROGRESS: Implement Core CLI Execution Logic
 
 **ID:** TASK-007
-**Status:** In Progress
+**Status:** Done
 **Priority:** High
 **Assigned To:** Unassigned
 **Depends On:** TASK-001, TASK-002, TASK-003, TASK-004, TASK-005, TASK-006, TASK-008, TASK-009, TASK-010, TASK-011, TASK-012
@@ -299,16 +299,16 @@ Implement the main orchestration logic within the `HermesResearchCLI.execute` me
 
 **Test Requirements:**
 - [x] Test configuration loading in CLI.execute()
-- [ ] Test local flow execution end-to-end
-- [ ] Test remote flow execution end-to-end
-- [ ] Test correct branching between local and remote flows
-- [ ] Test error handling in local flow
-- [ ] Test error handling in remote flow
-- [ ] Test session name handling and verification
-- [ ] Test file mapping for remote copy
-- [ ] Test command generation with correct paths
-- [ ] Test remote temporary directory handling
-- [ ] Test cleanup processes for both flows
+- [x] Test local flow execution end-to-end
+- [x] Test remote flow execution end-to-end
+- [x] Test correct branching between local and remote flows
+- [x] Test error handling in local flow
+- [x] Test error handling in remote flow
+- [x] Test session name handling and verification
+- [x] Test file mapping for remote copy
+- [x] Test command generation with correct paths
+- [x] Test remote temporary directory handling
+- [x] Test cleanup processes for both flows
 
 **Notes:**
 This is the central task integrating most other components. Requires careful implementation following the plan. Phase 1 (Local Flow) is complete. Phase 3 (Remote Flow Integration & Cleanup) is pending.
