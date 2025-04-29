@@ -29,6 +29,7 @@
 - When checking strings, verify the whole string at once, don't just check pieces. Use multiline text blocks if needed. So write only one assert if you anyway want to verify the whole string.
 - Use AAA (Arrange, Act, Assert)
 - Create a class per test file, add the unit tests inside the class
+- Prefer automated tests over manual tests
 
 ## Implementation
 

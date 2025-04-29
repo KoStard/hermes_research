@@ -56,7 +56,6 @@ class HermesResearchCLI(HermesResearchCLIInterface):
         config = self.config_manager.load_config()
         if not config.research_directory:
              logger.error("Research directory is not set in the configuration.")
-             print("Error: Research directory not configured. Please set it up.")
              # TODO: Add command to configure settings later
              return # Exit if essential config is missing
 
@@ -102,6 +101,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
             original_session_name = session_name
             while self.tmux_manager.session_exists(session_name):
                 logger.warning(f"Tmux session '{session_name}' already exists.")
+                # Use logger instead of print for user messages
                 action = MenuManager.selection_menu(
                     f"Tmux session '{session_name}' already exists.",
                     ["Kill existing session and proceed", "Enter a new session name", "Cancel"],
@@ -114,7 +114,7 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                         break # Exit loop, proceed with original name
                     except Exception as e:
                         logger.error(f"Failed to kill session '{session_name}': {e}")
-                        print(f"Error: Could not kill existing session '{session_name}'.")
+                        logger.error(f"Could not kill existing session '{session_name}'.")
                         # Ask again or cancel? Let's ask again.
                         continue
                 elif action == 1: # Enter new name
@@ -128,17 +128,17 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                              # The command was already generated with the original name path.
                              # This is complex. For now, let's assume the path created by save_command uses the *original* name.
                              # The tmux session name is separate. This might need refinement later.
-                             print(f"Warning: Research files will still be in '{original_session_name}' directory.")
+                             logger.warning(f"Research files will still be in '{original_session_name}' directory.")
                              break # Exit loop, proceed with new name
                         elif not new_name:
-                             print("Error: Session name cannot be empty.")
+                             logger.error("Session name cannot be empty.")
                         else:
-                             print(f"Error: Session '{new_name}' also exists.")
+                             logger.error(f"Session '{new_name}' also exists.")
                     except KeyboardInterrupt:
                          raise # Propagate cancellation
                 else: # Cancel
                     logger.warning("User cancelled due to existing tmux session.")
-                    print("Operation cancelled.")
+                    logger.info("Operation cancelled.")
                     return
 
             try:
@@ -149,19 +149,19 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 # Send the command string directly
                 self.tmux_manager.send_command(session_name, hermes_command)
 
-                logger.info(f"Local research session '{session_name}' started in tmux.") # TASK-011 Feedback
-                print(f"\nINFO: Local research session '{session_name}' started in tmux.")
-                print(f"INFO: You can attach to it using: tmux attach -t {session_name}") # TASK-011 Feedback
+                # Use logger.info for all user-facing messages
+                logger.info(f"\nLocal research session '{session_name}' started in tmux.")
+                logger.info(f"You can attach to it using: tmux attach -t {session_name}")
 
             except Exception as e:
                 logger.error(f"Failed to start local tmux session: {e}")
-                print(f"\nError starting tmux session: {e}")
+                logger.error(f"\nError starting tmux session: {e}")
                 # Attempt cleanup? The session might exist partially. Difficult to handle perfectly here.
 
         else:
             # --- Remote Execution Flow (Placeholder for Phase 2) ---
             logger.info(f"Preparing remote research session '{session_name}' on server '{selection.selected_server_name}'...")
-            print("\nINFO: Remote execution is not yet implemented in Phase 1.")
+            logger.info("\nRemote execution is not yet implemented in Phase 1.")
             # TODO: Implement Phase 2 logic here based on docs/cli_implementation_plan.md
             # 1. Get Remote Config
             # 2. Define Final Remote Research Path

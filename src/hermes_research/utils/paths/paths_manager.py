@@ -1,4 +1,5 @@
 import sys
+import logging
 from pathlib import Path
 from appdirs import user_config_dir
 from . import PathsManagerInterface
@@ -41,7 +42,7 @@ class PathsManager(PathsManagerInterface):
             config_dir = Path(user_config_dir(appname=self.APP_NAME, appauthor=False))
         else:
             # Fallback for other potential OS - default to Unix-like style
-            print(f"Warning: Unsupported platform '{sys.platform}'. Defaulting config path to ~/.config/{self.APP_NAME}/")
+            logging.warning(f"Unsupported platform '{sys.platform}'. Defaulting config path to ~/.config/{self.APP_NAME}/")
             config_dir = Path.home() / ".config" / self.APP_NAME
 
         # Ensure the directory exists

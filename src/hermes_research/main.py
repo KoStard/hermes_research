@@ -12,7 +12,7 @@ from hermes_research.tmux.ssh.subprocess_ssh_connection import SubprocessSSHConn
 from hermes_research.preparation.cli.hermes_research_cli import HermesResearchCLI
 
 # Configure logging (Basic setup) - TASK-011
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 
@@ -45,10 +45,10 @@ def main():
         cli.execute(args)
     except KeyboardInterrupt:
         logger.warning("Operation cancelled by user.")
-        print("\nOperation cancelled.")
+        logger.info("\nOperation cancelled.")
     except Exception as e:
         logger.exception(f"An unexpected error occurred: {e}")
-        print(f"\nAn error occurred: {e}")
+        logger.error(f"\nAn error occurred: {e}")
 
 if __name__ == "__main__":
     main()

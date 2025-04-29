@@ -416,21 +416,21 @@ Decide on the preferred strategy: automatic alternative name generation or user 
 
 ---
 
-### Task - IN PROGRESS: Implement User Feedback/Logging
+### Task - DONE: Implement User Feedback/Logging for Local Flow
 
 **ID:** TASK-011
-**Status:** In Progress
+**Status:** Done
 **Priority:** Medium
 **Assigned To:** Unassigned
 **Depends On:** N/A
 **Blocks:** TASK-007 (integrates feedback)
 
 **Description:**
-Implement informative user feedback messages (using `print` or `logging.info`) within the `HermesResearchCLI.execute` method to guide the user through the process, matching the examples shown in `docs/use_case_local.md` and `docs/use_case_remote.md`. This includes messages for starting the session, copying files, creating tmux sessions, and providing instructions on how to attach. Also ensure debug logging (`logging.debug`) is used for more detailed internal steps.
+Implement informative user feedback messages (using `print` or `logging.info`) within the `HermesResearchCLI.execute` method to guide the user through the process, matching the examples shown in `docs/use_case_local.md`. This includes messages for starting the session, creating tmux sessions, and providing instructions on how to attach. Also ensure debug logging (`logging.debug`) is used for more detailed internal steps.
 
 **Acceptance Criteria:**
-*   Key steps in both local and remote flows print informative messages to the console.
-*   Messages closely match the format and content shown in the use case documents.
+*   Key steps in local flow print informative messages to the console.
+*   Messages closely match the format and content shown in the use case document.
 *   Error messages are clear and helpful.
 *   Debug logging provides detailed information for troubleshooting.
 *   Standard Python `logging` module is used.
@@ -438,14 +438,44 @@ Implement informative user feedback messages (using `print` or `logging.info`) w
 **Test Requirements:**
 - [x] Test basic logging setup works correctly
 - [x] Test local flow prints appropriate user messages
-- [ ] Test remote flow prints appropriate user messages
 - [x] Test error messages are clear and helpful
 - [x] Test debug logging captures detailed information
-- [ ] Test log messages match expected format from use case docs
-- [ ] Test consistent formatting across all message types
+- [x] Test log messages match expected format from use case docs
+- [x] Test consistent formatting across all message types
 
 **Notes:**
-Ensure consistency in message formatting. Basic logging setup and local flow feedback implemented. Remote flow feedback pending.
+Ensure consistency in message formatting without manual "INFO:" prefixes. The proper logging configuration handles formatting log messages.
+
+---
+
+### Task - OPEN: Implement Remote Flow User Feedback/Logging
+
+**ID:** TASK-015
+**Status:** Open
+**Priority:** Medium
+**Assigned To:** Unassigned
+**Depends On:** TASK-007
+**Blocks:** N/A
+
+**Description:**
+Implement informative user feedback messages for the remote execution flow within the `HermesResearchCLI.execute` method, matching the examples shown in `docs/use_case_remote.md`. This includes messages for SSH connection testing, creating remote directories, copying files, managing remote tmux sessions, and providing instructions on how to attach.
+
+**Acceptance Criteria:**
+*   Key steps in the remote flow print informative messages to the console.
+*   Messages closely match the format and content shown in the remote use case document.
+*   Error messages for remote-specific failures are clear and helpful.
+*   Debug logging provides detailed information for troubleshooting remote operations.
+*   Standard Python `logging` module is used consistently with the local flow.
+
+**Test Requirements:**
+- [ ] Test remote flow prints appropriate user messages
+- [ ] Test remote error messages are clear and helpful
+- [ ] Test remote debug logging captures detailed information
+- [ ] Test remote log messages match expected format from use case docs
+- [ ] Test consistent formatting across all message types between local and remote flows
+
+**Notes:**
+This task should be implemented as part of the remote execution flow development. The feedback should follow the same format conventions as the local flow but include the additional SSH, file copying, and remote execution details.
 
 ---
 
