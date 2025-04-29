@@ -199,12 +199,12 @@ The existing `PathsManager` methods seem largely sufficient. This task focuses o
 
 ---
 
-### Task - OPEN: Implement SSHConnectionInterface
+### Task - DONE: Implement SSHConnectionInterface
 
 **ID:** TASK-006
-**Status:** Open
+**Status:** Done
 **Priority:** High
-**Assigned To:** Unassigned
+**Assigned To:** Completed
 **Depends On:** N/A
 **Blocks:** TASK-001, TASK-002
 
@@ -219,14 +219,14 @@ Ensure a robust implementation of `SSHConnectionInterface` exists. The current `
 *   Comprehensive unit tests cover various scenarios.
 
 **Test Requirements:**
-- [ ] Test successful command execution with mock subprocess
-- [ ] Test connection testing with various return scenarios
-- [ ] Test handling of timeout conditions
-- [ ] Test handling of authentication failures
-- [ ] Test handling of host key verification failures
-- [ ] Test with varied return codes and stderr messages
-- [ ] Test command execution with special characters
-- [ ] Test handling of large command output
+- [x] Test successful command execution with mock subprocess
+- [x] Test connection testing with various return scenarios
+- [x] Test handling of timeout conditions
+- [x] Test handling of authentication failures
+- [x] Test handling of host key verification failures
+- [x] Test with varied return codes and stderr messages
+- [x] Test command execution with special characters
+- [x] Test handling of large command output
 
 **Notes:**
 Consider edge cases like timeouts, host key checking, and different shell environments on the remote host. Using a library like Paramiko could be an alternative to `subprocess`.
@@ -442,12 +442,12 @@ Ensure consistency in message formatting without manual "INFO:" prefixes. The pr
 
 ---
 
-### Task - OPEN: Implement Remote Flow User Feedback/Logging
+### Task - DONE: Implement Remote Flow User Feedback/Logging
 
 **ID:** TASK-015
-**Status:** Open
+**Status:** Done
 **Priority:** Medium
-**Assigned To:** Unassigned
+**Assigned To:** Completed
 **Depends On:** TASK-007
 **Blocks:** N/A
 

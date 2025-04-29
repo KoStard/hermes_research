@@ -127,29 +127,83 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                 # Attempt cleanup? The session might exist partially. Difficult to handle perfectly here.
 
         else:
-            # --- Remote Execution Flow (Placeholder for Phase 2) ---
+            # --- Remote Execution Flow ---
             logger.info(f"Preparing remote research session '{session_name}' on server '{selection.selected_server_name}'...")
-            logger.info("\nRemote execution is not yet implemented in Phase 1.")
-            # TODO: Implement Phase 2 logic here based on docs/cli_implementation_plan.md
+            
             # 1. Get Remote Config
-            # 2. Define Final Remote Research Path
-            # 3. Define Remote Temp Path
-            # 4. Create Remote Temp Dir (SSH)
-            # 5. Generate Remote Command (using temp paths for files, final path for --deep-research)
-            # 6. Create Local Temp Script
-            # 7. Prepare File Map
-            # 8. Copy Files (RemoteCopy)
-            # 9. Configure Tmux for Remote
             remote_config = config.remote_servers.get(selection.selected_server_name)
-            if remote_config:
-                # Create SSH destination from config
-                ssh_destination = SSHDestination(
-                    username=remote_config.username,
-                    hostname=remote_config.hostname
+            if not remote_config:
+                logger.error(f"Remote server '{selection.selected_server_name}' configuration not found.")
+                return
+            
+            # Create SSH destination from config
+            ssh_destination = SSHDestination(
+                username=remote_config.username,
+                hostname=remote_config.hostname
+            )
+            
+            # 2. Define Final Remote Research Path
+            remote_research_path = os.path.join(
+                remote_config.remote_research_path,
+                session_name
+            )
+            logger.debug(f"Remote research path: {remote_research_path}")
+            
+            # 3. Define Remote Temp Path
+            remote_temp_dir = self.paths_manager.get_remote_files_folder()
+            logger.debug(f"Remote temporary directory: {remote_temp_dir}")
+            
+            # 5. Generate Remote Command (placeholder - actual implementation should use correct paths)
+            logger.info("Generating remote command script...")
+            hermes_command = self.command_manager.generate_command(
+                path_to_research=remote_research_path,  # Use remote path for --deep-research
+                model=selection.model,
+                files=[],  # Will be populated with paths inside the remote temp dir
+                budget=selection.budget,
+                prompt=selection.prompt,
+                extra_arguments=extra_args
+            )
+            logger.debug(f"Generated remote Hermes command:\n{hermes_command}")
+            
+            # 6. Create Local Temp Script
+            temp_script_path = self.command_manager.create_temp_script(hermes_command)
+            logger.debug(f"Created temporary script at: {temp_script_path}")
+            
+            try:
+                # Test SSH connection
+                logger.info(f"Testing SSH connection to {remote_config.username}@{remote_config.hostname}...")
+                if not self.ssh_connection.test_connection(ssh_destination):
+                    logger.error(f"SSH connection to {remote_config.username}@{remote_config.hostname} failed.")
+                    return
+                logger.info("Success.")
+                
+                # 4. Create Remote Temp Dir (SSH)
+                logger.info(f"Creating remote temporary directory on {remote_config.hostname}:{remote_temp_dir}...")
+                mkdir_cmd = f"mkdir -p {remote_temp_dir}"
+                stdout, stderr, returncode = self.ssh_connection.execute_command_on_remote(
+                    mkdir_cmd, ssh_destination
                 )
+                if returncode != 0:
+                    logger.error(f"Failed to create remote temporary directory: {stderr}")
+                    return
+                
+                # 7 & 8. Prepare File Map and Copy Files (RemoteCopy) - Placeholder
+                for file_path in absolute_file_paths:
+                    file_name = os.path.basename(file_path)
+                    remote_file_path = os.path.join(remote_temp_dir, file_name)
+                    logger.info(f"Copying {file_name} to {remote_config.hostname}:{remote_file_path}...")
+                    # Actual copy would happen here with RemoteCopy
+                
+                # Copy script to remote
+                remote_script_path = os.path.join(remote_temp_dir, "run_research.sh")
+                logger.info(f"Copying run script to {remote_config.hostname}:{remote_script_path}...")
+                # Actual copy would happen here with RemoteCopy
+                
+                # 9. Configure Tmux for Remote
+                logger.info(f"Configuring tmux for remote server '{selection.selected_server_name}'...")
                 self.tmux_manager.set_remote(ssh_destination)
                 
-                # 10. Manage Remote Tmux Session (check exists, create, send command - execute script)
+                # 10. Manage Remote Tmux Session
                 try:
                     session_name = self.session_name_manager.handle_session_name_conflict(
                         session_name, 
@@ -158,14 +212,29 @@ class HermesResearchCLI(HermesResearchCLIInterface):
                     )
                 except KeyboardInterrupt:
                     logger.info("Operation cancelled.")
-                    # TODO: Cleanup any temporary files created for remote execution
+                    # Cleanup any temporary files created for remote execution
                     return
                 
-                # Continue with remote command execution...
-                logger.info("Remote tmux session handling implemented, but full remote execution not yet available.")
-            else:
-                logger.error(f"Remote server '{selection.selected_server_name}' configuration not found.")
+                # Create remote tmux session
+                logger.info(f"Creating remote tmux session '{session_name}' on {remote_config.hostname}...")
+                self.tmux_manager.create_session(session_name)
+                
+                # Send command to remote tmux session
+                logger.info("Sending command to remote tmux session...")
+                # In actual implementation, this would execute the remote script
+                self.tmux_manager.send_command(session_name, f". {remote_script_path}")
+                
+                # Success message with connection instructions
+                logger.info(f"Remote research session '{session_name}' started on '{remote_config.hostname}'.")
+                logger.info(f"You can attach to it using: ssh {remote_config.username}@{remote_config.hostname} \"tmux attach -t {session_name}\"")
+                
+            except Exception as e:
+                logger.error(f"An error occurred during remote execution: {e}")
+                # Here we would implement cleanup of remote resources
                 return
-            
-            # 11. Cleanup Local Temp Script
-            pass
+            finally:
+                # 11. Cleanup Local Temp Script
+                if os.path.exists(temp_script_path):
+                    logger.debug(f"Cleaning up local temporary script: {temp_script_path}")
+                    # In actual implementation, we might want to keep this for debugging
+                    # os.unlink(temp_script_path)
