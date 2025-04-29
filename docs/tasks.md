@@ -34,7 +34,7 @@
 
 ## Pending Tasks
 
-### Task: Implement Remote Tmux Functionality
+### Task - OPEN: Implement Remote Tmux Functionality
 
 **ID:** TASK-001
 **Status:** Open
@@ -68,7 +68,7 @@ The current `TmuxManager` implementation only handles local tmux. The interactio
 
 ---
 
-### Task: Implement RemoteCopyInterface
+### Task - OPEN: Implement RemoteCopyInterface
 
 **ID:** TASK-002
 **Status:** Open
@@ -102,7 +102,7 @@ Don't use paramiko, to use the ~/.ssh/config setup out of the box.
 
 ---
 
-### Task: Define Strategy for Temporary Local Script
+### Task - OPEN: Define Strategy for Temporary Local Script
 
 **ID:** TASK-003
 **Status:** Open
@@ -132,7 +132,7 @@ Using `tempfile.NamedTemporaryFile(delete=False)` and manually cleaning up might
 
 ---
 
-### Task: Analyze and Implement Error Handling & Resource Cleanup
+### Task - OPEN: Analyze and Implement Error Handling & Resource Cleanup
 
 **ID:** TASK-004
 **Status:** Open
@@ -166,7 +166,7 @@ Consider atomicity where possible. Remote cleanup commands will need to be sent 
 
 ---
 
-### Task: Refine Remote Path Strategy
+### Task - DONE: Refine Remote Path Strategy
 
 **ID:** TASK-005
 **Status:** Done
@@ -202,7 +202,7 @@ The existing `PathsManager` methods seem largely sufficient. This task focuses o
 
 ---
 
-### Task: Implement SSHConnectionInterface
+### Task - OPEN: Implement SSHConnectionInterface
 
 **ID:** TASK-006
 **Status:** Open
@@ -236,7 +236,7 @@ Consider edge cases like timeouts, host key checking, and different shell enviro
 
 ---
 
-### Task: Implement Temporary Command Script Creation
+### Task - OPEN: Implement Temporary Command Script Creation
 
 **ID:** TASK-014
 **Status:** Open
