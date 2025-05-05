@@ -71,7 +71,7 @@ def main():
     
     try:
         # Handle different command groups
-        if not args.command or args.command == "research":
+        if args.command == "research":
             research_cli.execute(args)
         elif args.command == "config":
             config_cli.execute(args)

@@ -43,7 +43,6 @@ class HermesResearchCLI(HermesResearchCLIInterface):
 
     def define_cli(self, parser: ArgumentParser):
         parser.add_argument("files", help="Path to the files to be included", nargs="*")
-        # TASK-009: Add -c argument
         parser.add_argument(
             "-c", "--command-args",
             help="Additional arguments to pass directly to the hermes command, enclosed in quotes.",
@@ -62,16 +61,18 @@ class HermesResearchCLI(HermesResearchCLIInterface):
              logger.error("Research directory is not set in the configuration.")
              # TODO: Add command to configure settings later
              return # Exit if essential config is missing
+        
+        extra_args = args.command_args
+        files = args.files
 
         # Set config for menu and get user selections
         self.menu.set_config(config)
         selection = self.menu.get_selection() # Can raise KeyboardInterrupt or other exceptions
 
         session_name = selection.session_name
-        extra_args = args.command_args
 
         # Resolve input file paths to absolute paths (TASK-005)
-        absolute_file_paths = [self.paths_manager.get_absolute_path(f) for f in args.files]
+        absolute_file_paths = [self.paths_manager.get_absolute_path(f) for f in files]
         logger.debug(f"Absolute input file paths: {absolute_file_paths}")
 
         # --- Execution Flow ---
